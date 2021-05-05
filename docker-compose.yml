@@ -1,0 +1,96 @@
+# Default compose file for development and production.
+#
+# See: https://docs.docker.com/compose/extends/#multiple-compose-files
+
+version: "3.6"
+
+volumes:
+  elk_pg_data: {}
+  elk_redis_data: {}
+  elk_es_data: {}
+
+services:
+  elk-postgres:
+    image: postgres:12-alpine
+    container_name: "elk_postgres"
+    restart: unless-stopped
+    env_file: "./elk/.env"
+    volumes:
+      - "elk_pg_data:/var/lib/postgresql/data"
+    networks:
+      - "elk_net"
+
+  elk-redis:
+    image: redis:6-alpine
+    container_name: "elk_redis"
+    restart: unless-stopped
+    volumes:
+      - "elk_redis_data:/data"
+    networks:
+      - "elk_net"
+
+  elk-django: &django
+    image: "elk_django"
+    container_name: "elk_django"
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: "python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ".:/app"
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    env_file: "./elk/.env"
+    depends_on:
+      - "elk-postgres"
+      - "elk-redis"
+    networks:
+      - "elk_net"
+
+  # See: https://github.com/chrisk314/django-celery-docker-example
+  elk-celery:
+    image: "elk_django"
+    container_name: "elk_celery"
+    command: "celery --app=elk.celery worker"
+    restart: always
+    env_file: "./elk/.env"
+    volumes:
+      - ".:/app"
+    depends_on:
+      - "elk-django"
+      - "elk-redis"
+    networks:
+      - "elk_net"
+
+  elk-celerybeat:
+    image: "elk_django"
+    container_name: "elk_celerybeat"
+    command: "celery --pidfile= --app=elk.celery beat"
+    restart: always
+    env_file: "./elk/.env"
+    volumes:
+      - ".:/app"
+    depends_on:
+      - "elk-django"
+      - "elk-redis"
+    networks:
+      - "elk_net"
+
+  elk-flower:
+    image: "elk_django"
+    container_name: "elk_flower"
+    command: "celery -A elk flower --port=5555"
+    restart: unless-stopped
+    env_file: "./elk/.env"
+    depends_on:
+      - "elk-celery"
+      - "elk-celerybeat"
+    ports:
+      - "5555:5555"
+    networks:
+      - "elk_net"
+
+networks:
+  elk_net:
+    driver: bridge
