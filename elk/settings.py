@@ -36,6 +36,7 @@ ALLOWED_HOSTS = [
     'a.elk.today',
     'a-staging.elk.today',
     '127.0.0.1',
+    'localhost',
 ]
 ABSOLUTE_HOST = 'https://a.elk.today'
 
