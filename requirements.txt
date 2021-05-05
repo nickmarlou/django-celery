@@ -66,7 +66,7 @@ phonenumberslite==7.7.1
 pickleshare==0.7.2
 Pillow==7.2.0
 prompt-toolkit==3.0.5
-psycopg2==2.8.5
+psycopg2-binary==2.8.5
 ptyprocess==0.5.1
 py-moneyed==0.8.0
 pyasn1==0.1.9
