@@ -1,0 +1,3 @@
+__all__ = ["notify_customers_with_forgotten_subscriptions"]
+
+from .notify_customers_with_forgotten_subscriptions import notify_customers_with_forgotten_subscriptions
