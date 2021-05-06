@@ -1,0 +1,22 @@
+{% extends "mail_templated/base.tpl" %}
+{% load humanize %}
+
+{% block subject %}
+{{ s.customer.first_name | capfirst }}, we miss you!
+{% endblock %}
+
+{% block body %}
+Dear {{ s.customer.first_name | capfirst }}, we miss you!
+
+{% if s.has_scheduled_or_used_classes %}
+We noticed you don't use your subscription since {{ s.latest_class_timeline_end | naturalday:'SHORT_DATE_FORMAT'}}.
+
+Please, come back.
+{% else %}
+We noticed you haven't used your subscription since purchase.
+
+Please, give us a chance.
+{% endif %}
+
+{% include 'mailer/_signature.html' %}
+{% endblock %}

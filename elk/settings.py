@@ -36,6 +36,7 @@ ALLOWED_HOSTS = [
     'a.elk.today',
     'a-staging.elk.today',
     '127.0.0.1',
+    'localhost',
 ]
 ABSOLUTE_HOST = 'https://a.elk.today'
 
@@ -307,11 +308,16 @@ CACHES = {
 BROKER_URL = env('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND')
 CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_ACCEPT_CONTENT = ['pickle']
 
 CELERYBEAT_SCHEDULE = {
     'check_classes_that_will_start_soon': {
         'task': 'timeline.tasks.notify_15min_to_class',
         'schedule': timedelta(minutes=1),
+    },
+    'check_forgotten_subscriptions': {
+        'task': 'market.tasks.notify_customers_with_forgotten_subscriptions',
+        'schedule': timedelta(days=1),
     },
     'update_google_calendars': {
         'task': 'extevents.tasks.update_google_calendars',

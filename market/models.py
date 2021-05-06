@@ -82,6 +82,51 @@ class SubscriptionManager(ProductContainerManager):
             Q(first_lesson_date__lte=edge_date) | Q(first_lesson_date__isnull=True, buy_date__lte=edge_date)
         )
 
+    def active(self):
+        """
+        Find subscriptions that are active, e.g. first lesson date
+        or buy date + duration is later than now
+        """
+        edge_date = timezone.now() - F('duration')
+
+        return self.get_queryset().filter(
+            is_fully_used=False,
+        ).filter(
+            Q(first_lesson_date__gt=edge_date) | Q(first_lesson_date__isnull=True, buy_date__gt=edge_date)
+        )
+
+    def forgotten(self):
+        """
+        Find subscriptions that are active but forgotten
+
+        Any active subscription should be considered as forgotten, if it meets one of the conditions:
+        - subscription has no scheduled or used classes within a week or more from the moment of purchase
+        - subscription has latest used or scheduled class a week ago or more
+
+        One possible usecase for forgotten subscriptions queryset is to notify customers that
+        they lose money if not take classes
+        """
+        scheduled_or_used_classes = Class.objects.filter(
+            subscription=models.OuterRef('pk')
+        ).filter(
+            Q(is_scheduled=True) | Q(is_fully_used=True)
+        ).order_by('-timeline__end')
+
+        week_ago_datetime = timezone.now() - timedelta(weeks=1)
+
+        return self.active().annotate(
+            has_scheduled_or_used_classes=models.Exists(scheduled_or_used_classes),
+            latest_class_timeline_end=models.Subquery(scheduled_or_used_classes.values('timeline__end')[:1])
+        ).filter(
+            Q(
+                latest_class_timeline_end__isnull=False, 
+                latest_class_timeline_end__lte=week_ago_datetime
+            ) | Q(
+                has_scheduled_or_used_classes=False,
+                buy_date__lte=week_ago_datetime
+            )
+        )
+
 
 class Subscription(ProductContainer):
     """

@@ -6,6 +6,7 @@ backcall==0.2.0
 backports.shutil-get-terminal-size==1.0.0
 billiard==3.6.3.0
 celery==4.3.0
+flower==0.9.4
 cffi==1.14.0
 contextlib2==0.5.4
 cookies==2.2.1
@@ -42,7 +43,7 @@ flake8==3.0.4
 freezegun==0.3.7
 future==0.18.2
 geoip2==2.4.0
-gnureadline==6.3.3
+# gnureadline==6.3.3
 icalendar==3.10
 importlib-metadata==1.7.0
 ipaddress==1.0.14
@@ -65,7 +66,7 @@ phonenumberslite==7.7.1
 pickleshare==0.7.2
 Pillow==7.2.0
 prompt-toolkit==3.0.5
-psycopg2==2.8.5
+psycopg2-binary==2.8.5
 ptyprocess==0.5.1
 py-moneyed==0.8.0
 pyasn1==0.1.9
