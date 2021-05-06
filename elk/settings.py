@@ -315,6 +315,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'timeline.tasks.notify_15min_to_class',
         'schedule': timedelta(minutes=1),
     },
+    'check_forgotten_subscriptions': {
+        'task': 'market.tasks.notify_customers_with_forgotten_subscriptions',
+        'schedule': timedelta(days=1),
+    },
     'update_google_calendars': {
         'task': 'extevents.tasks.update_google_calendars',
         'schedule': timedelta(minutes=5),
