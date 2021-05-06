@@ -198,3 +198,31 @@ class TestClassManager(TestCase):
         self.subscription.save()
 
         self.assertEqual(models.Subscription.objects.due().count(), 0)
+    
+    def test_forgotten_queryset_based_on_buy_date(self):
+        self.assertEqual(models.Subscription.objects.forgotten().count(), 0)
+
+        with freeze_time('2032-11-5'):
+            self.assertEqual(models.Subscription.objects.forgotten().count(), 0)
+
+        with freeze_time('2032-11-10'):
+            self.assertEqual(models.Subscription.objects.forgotten().count(), 1)
+
+    def test_forgotten_queryset_based_on_latest_class_date(self):
+        c = self._schedule()
+        self.assertEqual(models.Subscription.objects.forgotten().count(), 0)
+        
+        with freeze_time('2032-12-5'):
+            self.assertEqual(models.Subscription.objects.forgotten().count(), 0)
+
+        with freeze_time('2032-12-10'):
+            self.assertEqual(models.Subscription.objects.forgotten().count(), 1)
+
+    def test_forgotten_queryset_that_have_scheduled_or_used_classes_ignores_buy_date(self):
+        c = self._schedule()
+
+        with freeze_time('2032-11-10'):
+            self.assertEqual(models.Subscription.objects.forgotten().count(), 0)
+
+        with freeze_time('2032-12-2'):
+            self.assertEqual(models.Subscription.objects.forgotten().count(), 0)
