@@ -21,7 +21,7 @@ class TestClassManager(TestCase):
     def setUpTestData(cls):
         cls.customer = create_customer()
         cls.product = products.Product1.objects.get(pk=cls.TEST_PRODUCT_ID)
-        cls.product.duration = timedelta(days=5)
+        cls.product.duration = timedelta(days=42)
 
     def setUp(self):
         self.subscription = models.Subscription(
