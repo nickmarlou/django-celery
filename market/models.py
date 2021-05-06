@@ -106,8 +106,10 @@ class SubscriptionManager(ProductContainerManager):
         One possible usecase for forgotten subscriptions queryset is to notify customers that
         they lose money if not take classes
         """
-        scheduled_or_used_classes = Class.objects.scheduled().filter(
-            subscription=models.OuterRef('pk'),
+        scheduled_or_used_classes = Class.objects.filter(
+            subscription=models.OuterRef('pk')
+        ).filter(
+            Q(is_scheduled=True) | Q(is_fully_used=True)
         ).order_by('-timeline__end')
 
         week_ago_datetime = timezone.now() - timedelta(weeks=1)
@@ -117,7 +119,7 @@ class SubscriptionManager(ProductContainerManager):
             latest_class_timeline_end=models.Subquery(scheduled_or_used_classes.values('timeline__end')[:1])
         ).filter(
             Q(
-                latest_class_timeline_end__isnull=False,
+                latest_class_timeline_end__isnull=False, 
                 latest_class_timeline_end__lte=week_ago_datetime
             ) | Q(
                 has_scheduled_or_used_classes=False,
